@@ -9,7 +9,7 @@ export const presets: Preset[] = [
       bottoms: { everyNDays: 4 },
       tees: { everyNDays: 2.5 },
       jumper: { everyNDays: 7 },
-      shirts: { everyNDays: 6 },
+      shirts: { everyNDays: 7 },
       bras: null,
       dresses: null,
       skirts: null,
