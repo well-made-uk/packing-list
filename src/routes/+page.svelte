@@ -48,12 +48,13 @@
         thermals: "Thermals",
     };
 
+    let tripName = $state("");
     let days = $state(7);
     let temperature = $state(15);
-    let laundryEnabled = $state(true);
+    let laundryEnabled = $state(false);
     let laundryEveryNDays = $state(7);
     let shirtsEnabled = $state(true);
-    let weather = $state<WeatherCondition[]>(["sun", "cloud"]);
+    let weather = $state<WeatherCondition[]>([]);
 
     let clothingRates = $state<Record<ClothingCategory, number>>({
         pants: 1,
@@ -137,6 +138,10 @@
 
     <section class="trip-details">
         <h2>Trip Details</h2>
+        <div class="field">
+            <label for="trip-name">Trip name</label>
+            <input id="trip-name" type="text" bind:value={tripName} />
+        </div>
         <div class="field">
             <label for="days">Trip length (days)</label>
             <input
@@ -233,7 +238,11 @@
     </section>
 
     <section class="results" bind:this={resultsEl}>
-        <h2>{activePreset ? `${activePreset}'s` : "Your"} Packing List</h2>
+        <h2>
+            {activePreset ? `${activePreset}'s` : "Your"} Packing List{tripName
+                ? ` - ${tripName}`
+                : ""}
+        </h2>
 
         <div class="result-group">
             <h3>Clothing</h3>
@@ -354,6 +363,14 @@
         border-radius: 4px;
         font-size: 0.9rem;
         text-align: center;
+    }
+
+    .field input[type="text"] {
+        width: 160px;
+        padding: 0.4rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.9rem;
     }
 
     .field input:disabled {
