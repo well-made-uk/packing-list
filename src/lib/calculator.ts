@@ -2,26 +2,26 @@ import type { TripConfig, PackingList, WeatherCondition } from "./types";
 
 /**
  * Returns the fraction of "bottoms" that should be shorts (0..1).
- * - <= 13°C → 0 (all trousers)
- * - >= 25°C → all but one pair are shorts (handled in caller, here we return ~1)
- * - Linear interpolation between 13 and 25
+ * - <= 12°C → 0 (all trousers)
+ * - >= 26°C → all but one pair are shorts (handled in caller, here we return 1)
+ * - Linear interpolation between 12 and 26
  */
 function shortsFraction(temperature: number): number {
-  if (temperature <= 13) return 0;
-  if (temperature >= 25) return 1;
-  return (temperature - 13) / (25 - 13);
+  if (temperature <= 12) return 0;
+  if (temperature >= 26) return 1;
+  return (temperature - 12) / (26 - 12);
 }
 
 /**
  * Returns the fraction of "jumpers" that should be thin (0..1).
- * - <= 10°C → 0 (all thick)
- * - >= 20°C → 1 (all thin)
- * - Linear interpolation between 10 and 20
+ * - <= 5°C → 0 (all thick)
+ * - >= 18°C → 1 (all thin)
+ * - Linear interpolation between 5 and 18
  */
 function thinJumperFraction(temperature: number): number {
-  if (temperature <= 10) return 0;
-  if (temperature >= 20) return 1;
-  return (temperature - 10) / (20 - 10);
+  if (temperature <= 5) return 0;
+  if (temperature >= 18) return 1;
+  return (temperature - 5) / (18 - 5);
 }
 
 export function calculatePackingList(config: TripConfig): PackingList {
@@ -64,13 +64,18 @@ export function calculatePackingList(config: TripConfig): PackingList {
 
   const accessories: PackingList["accessories"] = {
     sunglasses: has("sun"),
-    jacket: cold || has("wind") || has("cloud"),
-    waterproof: has("rain") || has("storm"),
+    lightJacket: temperature >= 12,
+    warmJacket: temperature < 12,
+    waterproof: has("rain"),
     hat: cold || has("snow"),
     gloves: cold || has("snow"),
-    gaitor: has("wind") || has("storm") || has("snow"),
-    thermals: temperature < 5,
+    gaitor: has("wind") || has("snow"),
+    thermals: temperature < 7,
   };
+
+  const bras = optCount(clothing.bras);
+  const dresses = optCount(clothing.dresses);
+  const skirts = optCount(clothing.skirts);
 
   return {
     clothing: {
@@ -82,6 +87,9 @@ export function calculatePackingList(config: TripConfig): PackingList {
       shirts,
       thinJumper,
       thickJumper,
+      bras,
+      dresses,
+      skirts,
     },
     accessories,
   };

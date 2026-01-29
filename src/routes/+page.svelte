@@ -8,6 +8,7 @@
         WeatherCondition,
         TripConfig,
     } from "$lib/types";
+    import { optionalCategories, femaleCategories } from "$lib/types";
 
     const clothingLabels: Record<ClothingCategory, string> = {
         underwear: "Underwear",
@@ -16,6 +17,9 @@
         tees: "T-Shirts",
         jumper: "Jumper / Midlayer",
         shirts: "Shirts",
+        bras: "Bras",
+        dresses: "Dresses",
+        skirts: "Skirts",
     };
 
     const outputClothingLabels: Record<OutputClothingCategory, string> = {
@@ -27,19 +31,22 @@
         shirts: "Shirts",
         thinJumper: "Thin Jumper",
         thickJumper: "Thick Jumper / Midlayer",
+        bras: "Bras",
+        dresses: "Dresses",
+        skirts: "Skirts",
     };
 
     const weatherOptions: { value: WeatherCondition; label: string }[] = [
         { value: "sun", label: "Sun" },
         { value: "rain", label: "Rain" },
-        { value: "storm", label: "Storm" },
         { value: "snow", label: "Snow" },
         { value: "wind", label: "Wind" },
     ];
 
     const accessoryLabels: Record<string, string> = {
         sunglasses: "Sunglasses",
-        jacket: "Jacket",
+        lightJacket: "Light Jacket",
+        warmJacket: "Warm Jacket",
         waterproof: "Waterproof",
         hat: "Hat",
         gloves: "Gloves",
@@ -52,7 +59,10 @@
     let temperature = $state(15);
     let laundryEnabled = $state(false);
     let laundryEveryNDays = $state(7);
-    let shirtsEnabled = $state(true);
+    let optionalEnabled = $state<Record<string, boolean>>(
+        Object.fromEntries(optionalCategories.map((c) => [c, c === "shirts"])),
+    );
+    let femaleEnabled = $state(false);
     let weather = $state<WeatherCondition[]>([]);
 
     let clothingRates = $state<Record<ClothingCategory, number>>({
@@ -60,8 +70,11 @@
         socks: 1,
         bottoms: 3,
         tees: 1,
-        shirts: 3,
         jumper: 4,
+        shirts: 3,
+        bras: 2,
+        dresses: 3,
+        skirts: 3,
     });
 
     function toggleWeather(condition: WeatherCondition) {
@@ -78,11 +91,13 @@
         const preset = presets.find((p) => p.name === presetName);
         if (!preset) return;
         activePreset = presetName;
-        shirtsEnabled = preset.clothing.shirts != null;
+        optionalEnabled = Object.fromEntries(
+            optionalCategories.map((c) => [c, preset.clothing[c] != null]),
+        );
         clothingRates = Object.fromEntries(
             Object.entries(preset.clothing).map(([k, v]) => [
                 k,
-                v?.everyNDays ?? 3,
+                v?.everyNDays ?? clothingRates[k as ClothingCategory],
             ]),
         ) as Record<ClothingCategory, number>;
     }
@@ -100,7 +115,12 @@
             clothing: Object.fromEntries(
                 Object.entries(clothingRates).map(([k, v]) => [
                     k,
-                    k === "shirts" && !shirtsEnabled ? null : { everyNDays: v },
+                    (optionalCategories.includes(k as ClothingCategory) &&
+                        !optionalEnabled[k]) ||
+                    (femaleCategories.includes(k as ClothingCategory) &&
+                        !femaleEnabled)
+                        ? null
+                        : { everyNDays: v },
                 ]),
             ) as TripConfig["clothing"],
         };
@@ -204,36 +224,80 @@
         <p class="hint">1 item every N days</p>
         <div class="clothing-grid">
             {#each Object.entries(clothingLabels) as [key, label]}
-                <div class="clothing-row">
-                    {#if key === "shirts"}
-                        <label class="checkbox-label" for="shirts-enabled">
+                {#if !femaleCategories.includes(key as ClothingCategory)}
+                    <div class="clothing-row">
+                        {#if optionalCategories.includes(key as ClothingCategory)}
+                            <label class="checkbox-label" for="{key}-enabled">
+                                <input
+                                    id="{key}-enabled"
+                                    type="checkbox"
+                                    bind:checked={optionalEnabled[key]}
+                                />
+                                {label}
+                            </label>
+                        {:else}
+                            <label for="clothing-{key}">{label}</label>
+                        {/if}
+                        <div class="rate-input">
+                            <span>1 every</span>
                             <input
-                                id="shirts-enabled"
-                                type="checkbox"
-                                bind:checked={shirtsEnabled}
+                                id="clothing-{key}"
+                                type="number"
+                                bind:value={
+                                    clothingRates[key as ClothingCategory]
+                                }
+                                oninput={onClothingRateInput}
+                                min="0.5"
+                                max="365"
+                                step="0.5"
+                                disabled={optionalCategories.includes(
+                                    key as ClothingCategory,
+                                ) && !optionalEnabled[key]}
                             />
-                            {label}
-                        </label>
-                    {:else}
-                        <label for="clothing-{key}">{label}</label>
-                    {/if}
-                    <div class="rate-input">
-                        <span>1 every</span>
-                        <input
-                            id="clothing-{key}"
-                            type="number"
-                            bind:value={clothingRates[key as ClothingCategory]}
-                            oninput={onClothingRateInput}
-                            min="0.5"
-                            max="365"
-                            step="0.5"
-                            disabled={key === "shirts" && !shirtsEnabled}
-                        />
-                        <span>days</span>
+                            <span>days</span>
+                        </div>
                     </div>
-                </div>
+                {/if}
             {/each}
         </div>
+        <label class="checkbox-label female-toggle">
+            <input type="checkbox" bind:checked={femaleEnabled} />
+            Women's clothing
+        </label>
+        {#if femaleEnabled}
+            <div class="clothing-grid female-grid">
+                {#each Object.entries(clothingLabels) as [key, label]}
+                    {#if femaleCategories.includes(key as ClothingCategory)}
+                        <div class="clothing-row">
+                            <label class="checkbox-label" for="{key}-enabled">
+                                <input
+                                    id="{key}-enabled"
+                                    type="checkbox"
+                                    bind:checked={optionalEnabled[key]}
+                                />
+                                {label}
+                            </label>
+                            <div class="rate-input">
+                                <span>1 every</span>
+                                <input
+                                    id="clothing-{key}"
+                                    type="number"
+                                    bind:value={
+                                        clothingRates[key as ClothingCategory]
+                                    }
+                                    oninput={onClothingRateInput}
+                                    min="0.5"
+                                    max="365"
+                                    step="0.5"
+                                    disabled={!optionalEnabled[key]}
+                                />
+                                <span>days</span>
+                            </div>
+                        </div>
+                    {/if}
+                {/each}
+            </div>
+        {/if}
     </section>
 
     <section class="results" bind:this={resultsEl}>
@@ -405,6 +469,16 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+    }
+
+    .female-toggle {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .female-grid {
+        margin-top: 0.5rem;
     }
 
     .clothing-row {
