@@ -1,0 +1,26 @@
+import type { Preset } from "./types";
+
+export const presets: Preset[] = [
+  {
+    name: "Ben",
+    clothing: {
+      pants: { everyNDays: 2.5 },
+      socks: { everyNDays: 2.5 },
+      bottoms: { everyNDays: 4 },
+      tees: { everyNDays: 2.5 },
+      shirts: { everyNDays: 6 },
+      jumper: { everyNDays: 7 },
+    },
+  },
+  {
+    name: "Naeem",
+    clothing: {
+      pants: { everyNDays: 2 },
+      socks: { everyNDays: 2 },
+      bottoms: { everyNDays: 3 },
+      tees: { everyNDays: 2 },
+      shirts: { everyNDays: 5 },
+      jumper: { everyNDays: 3 },
+    },
+  },
+];
