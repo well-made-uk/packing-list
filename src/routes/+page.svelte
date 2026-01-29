@@ -9,6 +9,8 @@
         TripConfig,
     } from "$lib/types";
     import { optionalCategories, femaleCategories } from "$lib/types";
+    import type { ExtrasCategory } from "$lib/types";
+    import { defaultExtras, extraItemLabels } from "$lib/extras";
 
     const clothingLabels: Record<ClothingCategory, string> = {
         underwear: "Underwear",
@@ -52,6 +54,8 @@
         gloves: "Gloves",
         gaitor: "Gaitor",
         thermals: "Thermals",
+        sunScreen: "Sun Screen",
+        insectRepellent: "Insect Repellent",
     };
 
     let tripName = $state("");
@@ -63,6 +67,8 @@
         Object.fromEntries(optionalCategories.map((c) => [c, c === "shirts"])),
     );
     let femaleEnabled = $state(false);
+    let extrasOpen = $state(false);
+    let extras = $state<ExtrasCategory[]>(defaultExtras());
     let weather = $state<WeatherCondition[]>([]);
 
     let clothingRates = $state<Record<ClothingCategory, number>>({
@@ -100,6 +106,7 @@
                 v?.everyNDays ?? clothingRates[k as ClothingCategory],
             ]),
         ) as Record<ClothingCategory, number>;
+        extras = structuredClone(preset.extras);
     }
 
     function onClothingRateInput() {
@@ -300,6 +307,47 @@
         {/if}
     </section>
 
+    <section class="extras">
+        <h2>
+            <button
+                class="expand-toggle"
+                onclick={() => (extrasOpen = !extrasOpen)}
+            >
+                {extrasOpen ? "−" : "+"} Extras
+            </button>
+        </h2>
+        {#if extrasOpen}
+            {#each extras as category}
+                <div class="extras-category">
+                    <h3>{category.label}</h3>
+                    <div class="extras-grid">
+                        {#each Object.entries(category.items) as [key, item]}
+                            <div class="extras-row">
+                                <label class="checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        bind:checked={item.enabled}
+                                    />
+                                    {extraItemLabels[key] ?? key}
+                                </label>
+                                {#if item.count != null}
+                                    <input
+                                        class="extras-count"
+                                        type="number"
+                                        bind:value={item.count}
+                                        min="1"
+                                        max="20"
+                                        disabled={!item.enabled}
+                                    />
+                                {/if}
+                            </div>
+                        {/each}
+                    </div>
+                </div>
+            {/each}
+        {/if}
+    </section>
+
     <section class="results" bind:this={resultsEl}>
         <h2>
             {activePreset ? `${activePreset}'s` : "Your"} Packing List{tripName
@@ -342,6 +390,31 @@
                 {/if}
             </ul>
         </div>
+
+        {#each extras as category}
+            {@const enabledItems = Object.entries(category.items).filter(
+                ([, item]) => item.enabled,
+            )}
+            {#if enabledItems.length > 0}
+                <div class="result-group">
+                    <h3>{category.label}</h3>
+                    <ul>
+                        {#each enabledItems as [key, item]}
+                            <li>
+                                <span class="item-name"
+                                    >{extraItemLabels[key] ?? key}</span
+                                >
+                                {#if item.count != null}
+                                    <span class="item-count">{item.count}</span>
+                                {:else}
+                                    <span class="item-check">&#10003;</span>
+                                {/if}
+                            </li>
+                        {/each}
+                    </ul>
+                </div>
+            {/if}
+        {/each}
     </section>
 
     <button class="save-btn" onclick={saveAsJpg}>Save as JPG</button>
@@ -511,6 +584,48 @@
     }
 
     .rate-input input:disabled {
+        opacity: 0.4;
+    }
+
+    .expand-toggle {
+        all: unset;
+        cursor: pointer;
+        font-size: 1.2rem;
+        font-weight: 600;
+        width: 100%;
+        display: block;
+    }
+
+    .extras-category {
+        margin-bottom: 0.75rem;
+    }
+
+    .extras-category:last-child {
+        margin-bottom: 0;
+    }
+
+    .extras-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .extras-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .extras-count {
+        width: 45px;
+        padding: 0.3rem 0.4rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .extras-count:disabled {
         opacity: 0.4;
     }
 

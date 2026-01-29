@@ -71,6 +71,8 @@ export function calculatePackingList(config: TripConfig): PackingList {
     gloves: cold || has("snow"),
     gaitor: has("wind") || has("snow"),
     thermals: temperature < 7,
+    sunScreen: has("sun") && temperature > 15,
+    insectRepellent: has("sun") && temperature > 25,
   };
 
   const bras = optCount(clothing.bras);

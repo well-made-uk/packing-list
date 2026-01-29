@@ -50,6 +50,8 @@ export interface PackingList {
     gloves: boolean;
     gaitor: boolean;
     thermals: boolean;
+    sunScreen: boolean;
+    insectRepellent: boolean;
   };
 }
 
@@ -66,7 +68,26 @@ export const femaleCategories: ClothingCategory[] = [
   "skirts",
 ];
 
+export interface ExtraItem {
+  enabled: boolean;
+  count?: number;
+}
+
+export interface ExtrasCategory {
+  label: string;
+  items: Record<string, ExtraItem>;
+}
+
+export interface PackingListExtras {
+  categories: ExtrasCategory[];
+  autoAdd: {
+    sunScreen: boolean;
+    insectRepellent: boolean;
+  };
+}
+
 export interface Preset {
   name: string;
   clothing: Record<ClothingCategory, ClothingRate | null>;
+  extras: ExtrasCategory[];
 }
