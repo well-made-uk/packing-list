@@ -32,12 +32,12 @@ export function calculatePackingList(config: TripConfig): PackingList {
   const effectiveDays =
     laundryEveryNDays != null ? Math.min(days, laundryEveryNDays) : days;
 
-  const count = (everyNDays: number) => Math.round(effectiveDays / everyNDays);
+  const count = (everyNDays: number) => Math.ceil(effectiveDays / everyNDays);
   const optCount = (rate: { everyNDays: number } | null) =>
     rate ? count(rate.everyNDays) : 0;
 
   // Simple categories
-  const pants = optCount(clothing.pants);
+  const underwear = optCount(clothing.underwear);
   const socks = optCount(clothing.socks);
   const tees = optCount(clothing.tees);
   const shirts = optCount(clothing.shirts);
@@ -74,7 +74,7 @@ export function calculatePackingList(config: TripConfig): PackingList {
 
   return {
     clothing: {
-      pants,
+      underwear,
       socks,
       trousers,
       shorts,

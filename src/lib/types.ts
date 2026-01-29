@@ -1,14 +1,8 @@
-export type WeatherCondition =
-  | "sun"
-  | "cloud"
-  | "rain"
-  | "storm"
-  | "snow"
-  | "wind";
+export type WeatherCondition = "sun" | "rain" | "storm" | "snow" | "wind";
 
 /** Categories the user sets a rate for (1 every N days) */
 export type ClothingCategory =
-  | "pants"
+  | "underwear"
   | "socks"
   | "bottoms"
   | "tees"
@@ -17,7 +11,7 @@ export type ClothingCategory =
 
 /** Categories that appear in the output packing list */
 export type OutputClothingCategory =
-  | "pants"
+  | "underwear"
   | "socks"
   | "trousers"
   | "shorts"

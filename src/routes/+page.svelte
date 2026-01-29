@@ -10,7 +10,7 @@
     } from "$lib/types";
 
     const clothingLabels: Record<ClothingCategory, string> = {
-        pants: "Pants",
+        underwear: "Underwear",
         socks: "Socks",
         bottoms: "Bottoms",
         tees: "T-Shirts",
@@ -19,7 +19,7 @@
     };
 
     const outputClothingLabels: Record<OutputClothingCategory, string> = {
-        pants: "Pants",
+        underwear: "Underwear",
         socks: "Socks",
         trousers: "Trousers",
         shorts: "Shorts",
@@ -31,7 +31,6 @@
 
     const weatherOptions: { value: WeatherCondition; label: string }[] = [
         { value: "sun", label: "Sun" },
-        { value: "cloud", label: "Cloud" },
         { value: "rain", label: "Rain" },
         { value: "storm", label: "Storm" },
         { value: "snow", label: "Snow" },
@@ -57,7 +56,7 @@
     let weather = $state<WeatherCondition[]>([]);
 
     let clothingRates = $state<Record<ClothingCategory, number>>({
-        pants: 1,
+        underwear: 1,
         socks: 1,
         bottoms: 3,
         tees: 1,
